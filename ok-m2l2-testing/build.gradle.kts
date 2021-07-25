@@ -15,6 +15,8 @@ kotlin {
 
     jvm {}
 
+    val kotestVersion: String by project
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -25,6 +27,8 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                implementation("io.kotest:kotest-assertions-core:$kotestVersion")
+                implementation("io.kotest:kotest-property:$kotestVersion")
             }
         }
         val jsMain by getting {
@@ -35,6 +39,7 @@ kotlin {
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test-js"))
+                implementation("io.kotest:kotest-framework-engine:$kotestVersion")
             }
         }
         val jvmMain by getting {
@@ -45,11 +50,15 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
+                implementation("io.kotest:kotest-runner-junit5:$kotestVersion")
             }
         }
     }
 }
 
-tasks.getByName<Test>("jvmTest") {
+//tasks.getByName<Test>("jvmTest") {
+//    useJUnitPlatform()
+//}
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
