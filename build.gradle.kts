@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") apply false
     kotlin("multiplatform") apply false
+    id("org.openapi.generator")
 }
 group = "ru.otus.otuskotlin.orchestrator"
 version = "0.0.1"
