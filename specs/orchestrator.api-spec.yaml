@@ -1,0 +1,535 @@
+openapi: 3.0.1
+info:
+  title: Orchestrator
+  description: 'Orchestrator - учебный проект курса "Backend разработка на Kotlin"'
+  license:
+    name: copyleft
+    url: https://copyleft.org
+  version: 0.0.1
+servers:
+  - url: https://localhost/
+tags:
+  - name: server
+    description: CRUDS для хостов
+  - name: project
+    description: CRUDS для проекта
+paths:
+  /server/init:
+    post:
+      tags:
+        - server
+      summary: Получить статус при инициализации
+      operationId: initServert
+      requestBody:
+        description: Объект запроса для инициализации при старте приложения
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitHostResponse'
+  /server/create:
+    post:
+      tags:
+        - server
+      summary: Добавить новый хост
+      operationId: createServer
+      requestBody:
+        description: Объект запроса для создания нового хоста
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateHostResponse'
+  /server/read:
+    post:
+      tags:
+        - server
+      summary: Получить информацию о хосте
+      operationId: readServer
+      requestBody:
+        description: Объект запроса для получения информации о хосте
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadHostResponse'
+  /server/update:
+    post:
+      tags:
+        - server
+      summary: Изменить настройки хоста
+      operationId: updateServer
+      requestBody:
+        description: Объект запроса для изменения хоста
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateHostResponse'
+  /server/delete:
+    post:
+      tags:
+        - server
+      summary: Удалить хост
+      operationId: deleteServer
+      requestBody:
+        description: Объект запроса для удаления хоста
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteHostResponse'
+  /server/search:
+    post:
+      tags:
+        - server
+      summary: Поиск хоста
+      operationId: searchServer
+      requestBody:
+        description: Объект запроса для поиска хоста
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchHostResponse'
+  /server/projects:
+    post:
+      tags:
+        - project
+      summary: Поиск проектов на хостах
+      operationId: offers
+      requestBody:
+        description: Объект запроса для поиска проектов на хостах
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupHostRequest'
+        required: true
+      responses:
+        200:
+          description: all responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupHostResponse'
+components:
+  schemas:
+
+    BaseMessage:
+      type: object
+      description: Базовый класс как для запросов, так и для ответов
+      properties:
+        messageType:
+          type: string
+          title: Дискриминатор
+          description: Дискриминатор, содержащий тип класса сообщения и использующийся для десериализации
+      discriminator:
+        propertyName: messageType
+
+    BaseRequest:
+      description: Базовый класс для всех запросов
+      allOf:
+        #        - $ref: '#/components/schemas/BaseMessage'
+        - type: object
+          properties:
+            requestId:
+              type: string
+
+    BaseResponse:
+      description: Базовый класс для всех ответов
+      allOf:
+        #        - $ref: '#/components/schemas/BaseMessage'
+        - type: object
+          properties:
+            requestId:
+              type: string
+            result:
+              type: string
+              enum:
+                - success
+                - error
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/RequestError'
+
+    RequestError:
+      type: object
+      description: Описание ошибки обработки запроса
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+
+    HostVisibility:
+      type: string
+      description: 'Тип видимости хоста для группы.'
+      enum:
+        - Group
+
+    CreateableHost:
+      type: object
+      description: Структура с данными для создания нового хоста
+      properties:
+        title:
+          type: string
+          title: Название хоста
+          description: Краткое название хоста
+        description:
+          type: string
+          title: Ip-адрес
+          description: ip-адрес хоста
+        groupId:
+          type: string
+          title: Идентификатор группы
+          description: Идентификатор группы которая может видеть и управлять сервер
+        visibility:
+          $ref: '#/components/schemas/HostVisibility'
+
+    HostProject:
+      type: object
+      description: 'Описание продукта (товара или услуги) объявления'
+      properties:
+        productType:
+          type: string
+          description: Идентификатор типа продукта для дискриминатора
+      discriminator:
+        propertyName: productType
+
+
+    UpdateableHost:
+      description: Структура для данных об объявлении в запросе на хост
+      allOf:
+        - $ref: '#/components/schemas/CreateableHost'
+        - type: object
+          properties:
+            id:
+              type: string
+              description: Идентификатор  хоста
+
+    ResponseHost:
+      description: Структура, описывающая объявление в ответе
+      allOf:
+        - $ref: '#/components/schemas/UpdateableHost'
+        - type: object
+          properties:
+            permissions:
+              type: array
+              uniqueItems: true
+              items:
+                $ref: '#/components/schemas/GroupPermissions'
+
+    GroupPermissions:
+      type: string
+      description: Доступы к операциям над хостом
+      enum:
+        - read
+        - update
+        - project
+
+    BaseDebugRequest:
+      type: object
+      description: Структура с описанием отладочных параметров запроса
+      properties:
+        mode:
+          type: string
+          default: prod
+          enum:
+            - prod
+            - test
+            - stub
+
+    BasePaginatedRequest:
+      type: object
+      description: Структура с описанием запрашиваемой страницы в запросах списков
+      properties:
+        size:
+          type: integer
+          description: Размер запрашиваемой страницы
+          format: int32
+        lastId:
+          type: string
+          description: Идентификатор последнего объекта предыдущей страницы
+
+    BasePaginatedResponse:
+      type: object
+      description: Структура с описанием страницы в ответе
+      properties:
+        size:
+          type: integer
+          description: Размер запрашиваемой страницы
+          format: int32
+        lastId:
+          type: string
+          description: Идентификатор последнего объекта предыдущей страницы
+        position:
+          type: string
+          enum:
+            - first
+            - middle
+            - last
+
+    InitHostRequest:
+      description: Структура для запроса начального состояния при старте вэб-клиента
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+
+    InitHostResponse:
+      description: Структура для ответа с начальным состоянием при старте вэб-клиента
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+
+
+    CreateHostRequest:
+      description: Структура для запроса создания нового объявления
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            createAd:
+              $ref: '#/components/schemas/CreateableHost'
+            debug:
+              allOf:
+                - $ref: '#/components/schemas/BaseDebugRequest'
+                - type: object
+                  properties:
+                    stub:
+                      type: string
+                      enum:
+                        - success
+                        - emptyTitle
+                        - databaseError
+
+    CreateHostResponse:
+      description: Структура для ответа на запрос о создании хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            createdAd:
+              $ref: '#/components/schemas/ResponseHost'
+
+
+
+    ReadHostRequest:
+      description: Структура для получения хостов
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            readAdId:
+              type: string
+            debug:
+              allOf:
+                - $ref: '#/components/schemas/BaseDebugRequest'
+                - type: object
+                  properties:
+                    stub:
+                      type: string
+                      enum:
+                        - success
+                        - emptyId
+                        - databaseError
+
+    ReadHostResponse:
+      description: Структура для ответа на запрос с информацией о хосте
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            readAd:
+              $ref: '#/components/schemas/ResponseHost'
+
+    UpdateHostRequest:
+      description: Структура для запроса обновления существующего хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            createAd:
+              $ref: '#/components/schemas/UpdateableHost'
+            debug:
+              allOf:
+                - $ref: '#/components/schemas/BaseDebugRequest'
+                - type: object
+                  properties:
+                    stub:
+                      type: string
+                      enum:
+                        - success
+                        - emptyTitle
+                        - databaseError
+
+    UpdateHostResponse:
+      description: Структура для ответа на запрос с информацией о хосте
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            updatedAd:
+              $ref: '#/components/schemas/ResponseHost'
+
+    DeleteHostRequest:
+      description: Структура для запроса удаления хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            deleteAdId:
+              type: string
+            debug:
+              allOf:
+                - $ref: '#/components/schemas/BaseDebugRequest'
+                - type: object
+                  properties:
+                    stub:
+                      type: string
+                      enum:
+                        - success
+                        - emptyId
+                        - databaseError
+
+    DeleteHostResponse:
+      description: Структура для ответа на запрос об удалении хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            deletedAd:
+              $ref: '#/components/schemas/ResponseHost'
+
+    SearchHostRequest:
+      description: Структура для запроса поиска хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/BasePaginatedRequest'
+
+    SearchHostResponse:
+      description: Структура для ответа на запрос поиска хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/BasePaginatedResponse'
+            foundAds:
+              type: array
+              items:
+                $ref: '#/components/schemas/ResponseHost'
+
+    GroupHostRequest:
+      description: Структура для запроса поиска груп доступа для хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/BasePaginatedRequest'
+            deleteAdId:
+              type: string
+            debug:
+              allOf:
+                - $ref: '#/components/schemas/BaseDebugRequest'
+                - type: object
+                  properties:
+                    stub:
+                      type: string
+                      enum:
+                        - success
+                        - emptyId
+                        - databaseError
+
+    GroupHostResponse:
+      description: Структура для ответа на запрос поиска груп для хоста
+      allOf:
+        - $ref: '#/components/schemas/BaseMessage'
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/BasePaginatedResponse'
+            offeredAds:
+              type: array
+              items:
+                $ref: '#/components/schemas/ResponseHost'
+
+
+    # Типы продуктов
+    HostProjectExample:
+      description: Описание проекта
+      allOf:
+        - $ref: '#/components/schemas/HostProject'
+        - type: object
+          properties:
+            name:
+              description: Название хоста
+              type: string
+              format: string
+            ipadress:
+              description: Диаметр болта в миллиметрах
+              type: string
+              format: string
+            group:
+              description: Группы имеющие доступ к хосту
+              type: string
+              format: string
